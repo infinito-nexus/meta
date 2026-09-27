@@ -33,3 +33,11 @@ services:
 
 volumes:
   mig-git:
+
+# A compose network takes 1500 whatever the host's own bridge runs at, so on a
+# host behind a tunnel the TLS handshake completes and the first large packet
+# of the clone is dropped: the mirror hangs at a few kilobytes with no error.
+networks:
+  default:
+    driver_opts:
+      com.docker.network.driver.mtu: "${MIG_MTU:-1500}"

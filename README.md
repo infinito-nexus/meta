@@ -522,6 +522,7 @@ MIG_GITHUB_ALERTS=false
 MIG_GIT_ROOT=infinito-nexus/core
 MIG_GIT_FORKS=auto
 MIG_GIT_HOME=/var/lib/mig
+MIG_MTU=1500
 ```
 
 `INFINITO_META_DIR` points at the repository-root `meta/` holding
@@ -538,6 +539,25 @@ tree is not served.
 `auto`, `off` or a space separated `owner/name` list, and `MIG_GIT_HOME` is
 where the mirror lives inside the container. An `.env` without these three
 lines stops `make up`; copy them from `default.env`.
+
+`MIG_MTU` is the link MTU of the compose network. A compose network takes
+1500 whatever the host runs at, so on a host behind a tunnel or a VPN the
+handshake to GitHub succeeds and the first full-size packet of the mirror
+clone is dropped: the clone stalls at a few kilobytes and every `/git/` route
+answers 502. Creating `.env` probes the value, and `make mtu` writes it again
+after the link changes:
+
+```bash
+make mtu         # mig: compose network MTU 1400, from automtu
+make rebuild     # the network is created with the new MTU
+```
+
+The probe asks [automtu](https://pypi.org/project/automtu/), which
+`requirements.txt` pins and `make install-python` installs; it is reached as a
+command or as `python3 -m automtu`, so a virtualenv holding the package works
+without it being on `PATH`. Without the package the probe falls back to the
+host's own docker bridge and then to 1500. Changing the value needs `make
+rebuild`, not `make up`: docker fixes a network's MTU when it creates it.
 
 Every reload reflects the current on-disk state of the roles tree.
 

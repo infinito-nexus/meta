@@ -13,8 +13,10 @@ MIG_CHROMIUM ?=
 # Param: LIBRETRANSLATE_URL  the LibreTranslate server make translate asks;
 #   LIBRETRANSLATE_API_KEY in the environment is sent along when set.
 LIBRETRANSLATE_URL ?= http://127.0.0.1:5000
+# Param: PYTHON  the interpreter that holds the requirements.txt packages
+PYTHON ?= python3
 
-.PHONY: help up down logs rebuild e2e vendor test test-fast lint test-server translate image nginx-verify nginx-probe gh-status git-status clean
+.PHONY: help up down logs rebuild e2e vendor test test-fast lint test-server translate image nginx-verify nginx-probe gh-status git-status git-route install-python mtu clean
 
 help:
 	@echo "Targets:"
@@ -34,10 +36,20 @@ help:
 	@echo "  make nginx-probe         Serve the image and probe the proxy routes"
 	@echo "  make gh-status           Report what the RUNNING stack does with the GitHub token"
 	@echo "  make git-status          Report the RUNNING stack's git mirror and its service"
+	@echo "  make git-route           Ask one /git/ route of the RUNNING stack (ROUTE=, BYTES=)"
+	@echo "  make install-python      Install the requirements.txt packages"
+	@echo "  make mtu                 Probe the link MTU and write MIG_MTU into .env"
 	@echo "  make clean               Down + remove volumes"
 
 .env:
 	cp default.env .env
+	@PYTHON=$(PYTHON) sh scripts/mtu.sh .env
+
+install-python:
+	$(PYTHON) -m pip install -r requirements.txt
+
+mtu: .env
+	@PYTHON=$(PYTHON) sh scripts/mtu.sh .env
 
 up: .env vendor
 	docker compose -f $(COMPOSE_FILE) up -d --build --force-recreate
@@ -75,7 +87,7 @@ lint: node_modules
 	npx tsc -p tsconfig.json
 
 test-server:
-	python3 -m pytest -q tests/mig
+	python3 -m pytest -q tests/mig tests/scripts
 
 translate:
 	LIBRETRANSLATE_URL=$(LIBRETRANSLATE_URL) node scripts/translate.js
@@ -124,6 +136,16 @@ git-status:
 		 echo "service: $$(pgrep -f mig/git.py >/dev/null && echo running || echo DOWN)"; \
 		 echo "direct : $$(wget -S -qO- http://127.0.0.1:$$MIG_GIT_PORT/catalog 2>&1 | grep -o "HTTP/1.[01] [0-9]*" | head -1)"; \
 		 echo "proxied: $$(wget -S -qO- http://127.0.0.1/git/catalog 2>&1 | grep -o "HTTP/1.1 [0-9]*" | head -1)"'
+
+# Param: ROUTE  a /git/ route to ask, without the prefix (default: updates)
+# Param: BYTES  how much of the answer to print (default: 400)
+# The first updates read walks every role and asks each registry, so the wait
+# is minutes rather than the default seconds.
+ROUTE ?= updates
+BYTES ?= 400
+git-route:
+	@docker compose -f $(COMPOSE_FILE) exec -T $(SERVICE) sh -c \
+		'wget -S -T 900 -qO- "http://127.0.0.1/git/$(ROUTE)" 2>&1 | head -c $(BYTES)'
 
 gh-status:
 	@docker compose -f $(COMPOSE_FILE) exec -T $(SERVICE) sh -c \

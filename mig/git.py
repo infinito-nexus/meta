@@ -34,6 +34,9 @@ TREES = os.path.join(HOME, "worktrees")
 UNPACKED = os.path.join(HOME, "artifacts")
 PORT = int(os.environ["MIG_GIT_PORT"])
 KEEP = int(os.environ["MIG_GIT_KEEP"])
+# A bare clone keeps the root's branches as refs/heads, so it has no
+# refs/remotes/origin and "origin/HEAD" resolves to nothing.
+HEAD = "HEAD"
 UNIT = "\x1f"
 
 
@@ -190,17 +193,17 @@ class Handler(BaseHTTPRequestHandler):
                 body = catalog()
             elif route.path == "/log":
                 body = log(
-                    query.get("ref", "origin/HEAD"),
+                    query.get("ref", HEAD),
                     query.get("since", ""),
                     query.get("until", ""),
                     min(int(query.get("limit", "20000")), 50000),
                 )
             elif route.path == "/checkout":
-                body = checkout(query.get("at", ""), query.get("ref", "origin/HEAD"))
+                body = checkout(query.get("at", ""), query.get("ref", HEAD))
             elif route.path == "/refresh":
                 body = refresh()
             elif route.path == "/todos":
-                body = todos.collect(lambda args: git(*args, check=False), query.get("ref", "origin/HEAD"))
+                body = todos.collect(lambda args: git(*args, check=False), query.get("ref", HEAD))
             elif route.path == "/artifact" and query.get("id", "").isdigit():
                 body = artifacts.fetch(mirrored(query.get("repo", ROOT)), query["id"],
                                        os.environ.get("MIG_GITHUB_TOKEN", ""), UNPACKED)
