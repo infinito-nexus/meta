@@ -1,6 +1,7 @@
 import { el } from '../dom.js';
 import { html, render } from '../html.js';
 import { t } from '../i18n.js';
+import { ask } from '../mirror.js';
 
 const COLUMNS = ['kind', 'where', 'item'];
 const RANK = { fixme: 0, hack: 1, xxx: 2, todo: 3, note: 4 };
@@ -111,8 +112,7 @@ export class TodosView {
     this.items = null;
     this._paint();
     this.loaded = this.track(
-      fetch('/git/todos')
-        .then(answer => (answer.ok ? answer.json() : Promise.reject(new Error(`HTTP ${answer.status}`))))
+      ask('/git/todos')
         .then(body => {
           this.items = body.items || [];
           this.capped = Boolean(body.capped);

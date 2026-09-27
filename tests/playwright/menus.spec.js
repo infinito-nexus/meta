@@ -88,3 +88,20 @@ test('the todos view lists code markers and TODO.md lines together', async ({ pa
   await expect.poll(() => rows.count()).toBe(1);
   await expect(page.locator('.table-note')).toContainText('1 is left after the filters');
 });
+
+test('a mirror that names its failure is quoted, not reduced to its status', async ({ page }) => {
+  await open(page, '?view=todos');
+  await expect.poll(() => page.locator('table.todo-table tbody tr').count(), { timeout: 60000 }).toBe(3);
+
+  // Registered after boot, whose own stub would otherwise win, and reached
+  // through a reload because the view keeps what it already read.
+  await page.route('**/git/todos*', route => route.fulfill({
+    status: 502, contentType: 'application/json',
+    body: JSON.stringify({ error: "git grep: fatal: not a valid object name: 'origin/HEAD'" }),
+  }));
+  await page.reload();
+
+  await expect(page.locator('.table-note'), 'the mirror names the cause, the status does not')
+    .toContainText('not a valid object name', { timeout: 60000 });
+  await expect(page.locator('.table-note')).not.toContainText('HTTP 502');
+});
