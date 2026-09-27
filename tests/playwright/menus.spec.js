@@ -25,7 +25,7 @@ test('security holds alerts, warnings and CSP; items holds pulls and todos', asy
   await open(page);
   await expect(page.locator('#btn-security + .view-menu label'), 'each entry names where it reads from')
     .toHaveText(['GitHub Alerts', 'CI Warnings', 'CSP']);
-  await expect(page.locator('#btn-items + .view-menu label')).toHaveText(['PR', 'Todos']);
+  await expect(page.locator('#btn-items + .view-menu label')).toHaveText(['PR', 'Todos', 'Updates']);
   await expect(page.locator('#view-warnings'), 'warnings is no longer a tab of its own')
     .toHaveCount(1);
   await expect(page.locator('.navbar input[name="view"][value="warnings"] + label.btn')).toHaveCount(0);

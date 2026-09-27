@@ -33,6 +33,28 @@ const TODOS = {
   ],
 };
 
+const UPDATES = {
+  at: 1790000000,
+  items: [
+    {
+      role: 'web-app-nextcloud', service: 'nextcloud', image: 'nextcloud',
+      version: '34-fpm-alpine', latest: '35-fpm-alpine', state: 'behind', error: '',
+    },
+    {
+      role: 'web-app-nextcloud', service: 'proxy', image: 'nginx',
+      version: '1.31.6-alpine', latest: '', state: 'current', error: '',
+    },
+    {
+      role: 'svc-db-postgres', service: 'database', image: 'postgres',
+      version: 'latest', latest: '', state: 'floating', error: '',
+    },
+    {
+      role: 'web-app-x', service: 'app', image: 'registry.example.com/team/app',
+      version: '1.0.0', latest: '', state: 'unknown', error: 'not on a registry this reads',
+    },
+  ],
+};
+
 const LOG = {
   main: [
     { sha: 'aaaa1111', parents: ['aaaa2222'], date: '2026-09-01T00:00:00Z', message: 'newest on main' },
@@ -52,6 +74,9 @@ function mirror(page, calls) {
     page.route('**/git/checkout*', route => route.fulfill({
       status: 200, contentType: 'application/json',
       body: JSON.stringify({ sha: SHA, date: '2026-09-08T00:00:00Z', path: `/at/${SHA}/` }),
+    })),
+    page.route('**/git/updates*', route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify(UPDATES),
     })),
     page.route('**/git/todos*', route => route.fulfill({
       status: 200, contentType: 'application/json', body: JSON.stringify(TODOS),
@@ -84,4 +109,4 @@ async function boot(page, calls, query = '') {
   await page.evaluate(() => window.__mig.forkTree.api.forget());
 }
 
-module.exports = { SHA, CATALOG, LOG, TODOS, mirror, boot };
+module.exports = { SHA, CATALOG, LOG, TODOS, UPDATES, mirror, boot };

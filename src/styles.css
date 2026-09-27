@@ -363,6 +363,16 @@ tr.feed-pickable:hover td {
   max-width: 52ch;
 }
 
+.update-behind { color: var(--bs-warning); font-weight: 600; }
+.update-unknown { color: var(--bs-danger); }
+.update-floating { opacity: 0.75; }
+.update-current { color: var(--bs-success); }
+
+.update-image, .update-version {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+}
+
 .todo-fixme { color: var(--bs-danger); }
 .todo-hack, .todo-xxx { color: var(--bs-warning); }
 .todo-note { opacity: 0.8; }

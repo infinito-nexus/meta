@@ -253,8 +253,8 @@ order behind the planned ones; they still have tests.
 
 ### Items
 
-The **Items** menu holds what is open rather than what ran: **PR** and
-**Todos**. `?view=pulls` and `?view=todos` open them.
+The **Items** menu holds what is open rather than what ran: **PR**, **Todos**
+and **Updates**. `?view=pulls`, `?view=todos` and `?view=updates` open them.
 
 #### Todos
 
@@ -264,6 +264,32 @@ file, so the mirror answers `GET /git/todos?ref=`, which is one `git grep` over
 the ref plus a read of each note file; a line that both sources name is listed
 once. Each row links to that line of the file on GitHub, and the marker menu
 and the search narrow them.
+
+#### Updates
+
+Every image the roles pin in `meta/services.yml`, against the newest tag its
+registry lists. The browser may not ask a registry directly, so the mirror
+answers `GET /git/updates?ref=&fresh=`: it reads the pins out of the ref, asks
+Docker Hub or ghcr, and keeps the answer for six hours; the reload menu asks
+again. Each row names the role, the service, the image, the pinned tag and the
+newest one, and links to the open pull request whose title names that image.
+
+A tag counts as newer only when it has the pin's own shape: the same optional
+`v`, the same number of components, the same suffix. `34-fpm-alpine` is
+measured against `35-fpm-alpine`, never against `36-fpm` or `35-apache`, and
+`17-3.5` never against `18-3.6`, so the table proposes no jump across flavours
+and a bump between them stays a human decision. Four states follow from that:
+
+- **behind**: the registry lists a newer tag of that shape.
+- **current**: it does not.
+- **unpinned**: the pin is `latest` or another word, so nothing can be
+  compared.
+- **unknown**: the image sits on a registry this does not read, such as a
+  private one, or the call failed; the row keeps the reason.
+
+Only the newest hundred tags of a repository are read, so a line that has not
+been published in a while can stay on **current** although a newer tag of its
+shape exists further back.
 
 ### Timeline
 

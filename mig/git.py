@@ -11,6 +11,8 @@ Endpoints (all GET, all JSON):
   /refresh                     fetch every remote again
   /todos?ref=                  every TODO marker in the code and every line of
                                a TODO.md, on one ref
+  /updates?ref=&fresh=         every image pin of the roles tree against the
+                               newest tag its registry lists
   /artifact?id=&repo=          a Playwright artifact of the root or a mirrored
                                fork, unpacked under /artifacts/<id>/, and its
                                results
@@ -26,6 +28,7 @@ from urllib.parse import parse_qs, urlparse
 
 import artifacts
 import todos
+import updates
 
 ROOT = os.environ["MIG_GIT_ROOT"]
 HOME = os.environ["MIG_GIT_HOME"]
@@ -128,6 +131,18 @@ def catalog():
     return {"root": ROOT, "repos": repos, "tags": tags(), "span": span()}
 
 
+# Args:
+#   ref: the ref whose roles tree is read.
+# Returns: role name -> its meta/services.yml as written on that ref.
+def services(ref):
+    found = {}
+    for path in git("ls-tree", "-r", "--name-only", ref, "--", "roles/").splitlines():
+        if not path.endswith("/meta/services.yml"):
+            continue
+        found[path.split("/")[1]] = git("show", f"{ref}:{path}", check=False)
+    return found
+
+
 def log(ref, since, until, limit):
     args = ["log", f"--format=%H{UNIT}%P{UNIT}%cI{UNIT}%s", f"--max-count={limit}"]
     if since:
@@ -204,6 +219,9 @@ class Handler(BaseHTTPRequestHandler):
                 body = refresh()
             elif route.path == "/todos":
                 body = todos.collect(lambda args: git(*args, check=False), query.get("ref", HEAD))
+            elif route.path == "/updates":
+                body = updates.cached(HOME, services(query.get("ref", HEAD)),
+                                      fresh=query.get("fresh", "") == "true")
             elif route.path == "/artifact" and query.get("id", "").isdigit():
                 body = artifacts.fetch(mirrored(query.get("repo", ROOT)), query["id"],
                                        os.environ.get("MIG_GITHUB_TOKEN", ""), UNPACKED)
