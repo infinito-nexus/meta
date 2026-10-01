@@ -1,5 +1,7 @@
 // graphRenderer.js
 
+import * as THREE from 'three';
+
 /**
  * Renders a 3D force‑directed graph into a given container,
  * and makes sure the graph always fills the visible viewport

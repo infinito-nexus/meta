@@ -7,13 +7,13 @@ const BRANDS = path.join(ROOT, 'src/role/brands.json');
 
 // [package, file inside it, target under src/vendor]
 const FILES = [
-  // 3d-force-graph 1.73.4 is built against three 0.146; bump the two together.
-  ['three', 'build/three.min.js', 'three.min.js'],
+  ['three', 'build/three.module.js', 'three.module.js'],
+  ['three', 'build/three.core.js', 'three.core.js'],
   ['3d-force-graph', 'dist/3d-force-graph.min.js', '3d-force-graph.min.js'],
   ['bootstrap', 'dist/js/bootstrap.bundle.min.js', 'bootstrap.bundle.min.js'],
   ['bootstrap', 'dist/css/bootstrap.min.css', 'bootstrap.min.css'],
   ['bootstrap', 'dist/css/bootstrap.rtl.min.css', 'bootstrap.rtl.min.css'],
-  ['js-yaml', 'dist/js-yaml.min.js', 'js-yaml.min.js'],
+  ['js-yaml', 'dist/browser/js-yaml.umd.min.js', 'js-yaml.min.js'],
   // The stylesheet reaches its fonts as ../webfonts/, so the two keep that layout.
   ['@fortawesome/fontawesome-free', 'LICENSE.txt', 'fontawesome/LICENSE.txt'],
   ['@fortawesome/fontawesome-free', 'css/all.min.css', 'fontawesome/css/all.min.css'],
