@@ -11,7 +11,7 @@ FROM nginx:alpine
 
 RUN apk add --no-cache git python3
 
-ENV MIG_GIT_PORT=8399 MIG_GIT_KEEP=3
+ENV MIG_GIT_PORT=8399 MIG_GIT_KEEP=3 MIG_ARTIFACT_GROUP=nginx
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker_entrypoint/10-mig-github.sh /docker-entrypoint.d/10-mig-github.sh

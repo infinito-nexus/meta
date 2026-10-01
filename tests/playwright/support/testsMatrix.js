@@ -1,5 +1,3 @@
-const { expect } = require('@playwright/test');
-
 const MANIFEST = `
 const { test } = require("@playwright/test");
 require("./test-baseline");

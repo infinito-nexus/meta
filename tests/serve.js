@@ -41,6 +41,14 @@ const MIME = {
   '.woff2': 'font/woff2',
 };
 
+function within(base, rel) {
+  const target = path.resolve(base, rel.replace(/^[/\\]+/, ''));
+  if (target !== base && !target.startsWith(base + path.sep)) {
+    throw new Error('outside the served tree');
+  }
+  return target;
+}
+
 function autoindex(dir) {
   return JSON.stringify(
     fs.readdirSync(dir, { withFileTypes: true }).map(d => ({
@@ -56,7 +64,7 @@ http
     try {
       if (url === '/roles/' || url.startsWith('/roles/')) {
         const rel = url.replace(/^\/roles\/?/, '');
-        const target = path.join(ROLES, rel);
+        const target = within(ROLES, rel);
         if (url.endsWith('/')) {
           // Read before answering: a missing directory must reach the catch
           // below, not throw after the 200 head is already on the wire.
@@ -69,7 +77,7 @@ http
         return res.end(body);
       }
       if (url.startsWith('/infinito_tests/')) {
-        const target = path.join(TESTS, url.replace(/^\/infinito_tests\//, ''));
+        const target = within(TESTS, url.replace(/^\/infinito_tests\//, ''));
         if (url.endsWith('/')) {
           const listing = autoindex(target);
           res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -89,13 +97,13 @@ http
         return res.end(JSON.stringify({ proxy: Boolean(process.env.MIG_GITHUB_TOKEN) }));
       }
       if (url.startsWith('/infinito_meta/')) {
-        const target = path.join(META, url.replace(/^\/infinito_meta\//, ''));
+        const target = within(META, url.replace(/^\/infinito_meta\//, ''));
         const body = fs.readFileSync(target);
         res.writeHead(200, { 'Content-Type': MIME[path.extname(target)] || 'text/plain' });
         return res.end(body);
       }
       const file = url === '/' ? '/index.html' : url;
-      const target = path.join(SRC, file);
+      const target = within(SRC, file);
       const body = fs.readFileSync(target);
       res.writeHead(200, { 'Content-Type': MIME[path.extname(target)] || 'text/plain' });
       return res.end(body);

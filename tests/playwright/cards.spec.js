@@ -220,6 +220,6 @@ test('a role with a single video plays it inside the card', async ({ page }) => 
   await page.locator(`table.bond-matrix tbody th[data-role-name="${role}"]`).hover();
   const frame = page.locator(`.role-card-host[data-role="${role}"] iframe.role-card-video`);
   await expect(frame).toBeVisible();
-  await expect(frame).toHaveAttribute('src', /youtube-nocookie\.com\/embed\//);
+  await expect(frame).toHaveAttribute('src', /^https:\/\/www\.youtube-nocookie\.com\/embed\//);
   await expect(frame).toHaveAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
 });

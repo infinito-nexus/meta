@@ -70,6 +70,26 @@ test('make translate fills only what is missing and names the languages it canno
   expect(output).toContain('kl (4)');
 });
 
+test('a language with no catalogue of its own yet is written from nothing', async () => {
+  const dir = locales({});
+  fs.writeFileSync(path.join(dir, 'index.json'), JSON.stringify([{ code: 'en' }, { code: 'de' }]));
+
+  const report = await fill(dir, new Set(['de']), async texts => texts.map(text => `[de] ${text}`));
+  expect(report.filled, 'every english entry, none of them read from disk first').toEqual({ de: 4 });
+  expect(fs.existsSync(path.join(dir, 'de.json'))).toBe(true);
+});
+
+test('a language code that is no language code never reaches a path', async () => {
+  const dir = locales({});
+  fs.writeFileSync(path.join(dir, 'index.json'),
+    JSON.stringify([{ code: 'en' }, { code: '../../escaped' }]));
+
+  await expect(fill(dir, new Set(['de']), async texts => texts))
+    .rejects.toThrow('unusable language code');
+  expect(fs.existsSync(path.join(path.dirname(dir), 'escaped.json')), 'nothing was written outside')
+    .toBe(false);
+});
+
 test('a translation that loses a placeholder is reported, never written', async () => {
   const dir = locales({ de: {} });
   const report = await fill(dir, new Set(['de']), async texts => texts.map(text => text.replace('{0}', 'x')));

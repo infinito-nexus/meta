@@ -7,6 +7,17 @@ const HOLE = /\{(\w+)\}/g;
 
 const holes = text => [...new Set(text.match(HOLE) || [])].sort().join(',');
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
+
+const CODE = /^[a-z]{2,3}(-[a-z0-9]+)*$/i;
+
+function catalogue(file) {
+  try {
+    return read(file);
+  } catch (error) {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  }
+}
 const filled = value => typeof value === 'string' && value.trim() !== '';
 
 // Returns: [{ key, category, source }], one per text the catalogue lacks;
@@ -50,8 +61,9 @@ async function fill(dir, supported, translate) {
   const report = { filled: {}, skipped: [], unsupported: {} };
   for (const { code } of read(path.join(dir, 'index.json'))) {
     if (code === 'en') continue;
+    if (!CODE.test(code)) throw new Error(`index.json lists an unusable language code: ${code}`);
     const file = path.join(dir, `${code}.json`);
-    const own = fs.existsSync(file) ? read(file) : {};
+    const own = catalogue(file);
     const missing = gaps(english, own, new Intl.PluralRules(code).resolvedOptions().pluralCategories);
     if (!missing.length) continue;
     const target = supported.has(code) ? code : supported.has(ALIASES[code]) ? ALIASES[code] : null;

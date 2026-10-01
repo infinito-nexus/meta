@@ -6,6 +6,7 @@ unpacks it under <home>/<id>/ for nginx to serve, and answers with the JUnit
 results of every report inside.
 """
 
+import grp
 import json
 import os
 import re
@@ -25,6 +26,9 @@ LIMIT = int(os.environ.get("MIG_ARTIFACT_LIMIT") or 2 * 1024 * 1024 * 1024)
 BUDGET = int(os.environ.get("MIG_ARTIFACT_BUDGET") or 8 * 1024 * 1024 * 1024)
 RESULTS = "results.json"
 JUNIT = "playwright-junit.xml"
+GROUP = os.environ.get("MIG_ARTIFACT_GROUP")
+DIRECTORY = 0o750
+FILE = 0o640
 ATTACHMENT = re.compile(r"\[\[ATTACHMENT\|([^\]]+)\]\]")
 GUARD = threading.Lock()
 LOCKS = {}
@@ -178,15 +182,28 @@ def _shim(where, results):
             page.write(html)
 
 
+def _grant(path, mode):
+    """Args:
+        path: the entry to open to the serving group.
+        mode: DIRECTORY or FILE.
+    """
+    os.chmod(path, mode)
+    if GROUP:
+        try:
+            os.chown(path, -1, grp.getgrnam(GROUP).gr_gid)
+        except KeyError:
+            raise Failed(f"MIG_ARTIFACT_GROUP names no group here: {GROUP}") from None
+
+
 def _readable(root):
     """Opens the unpacked tree to nginx, whose worker is not the user that wrote
     it: mkdtemp() makes the root 0700, and a zip may carry modes of its own."""
-    os.chmod(root, 0o755)
+    _grant(root, DIRECTORY)
     for folder, folders, files in os.walk(root):
         for name in folders:
-            os.chmod(os.path.join(folder, name), 0o755)
+            _grant(os.path.join(folder, name), DIRECTORY)
         for name in files:
-            os.chmod(os.path.join(folder, name), 0o644)
+            _grant(os.path.join(folder, name), FILE)
 
 
 def _bytes(folder):
@@ -225,7 +242,7 @@ def fetch(root, artifact_id, token, home):
     with _lock(artifact_id):
         if os.path.isfile(done):
             os.utime(where)
-            os.chmod(where, 0o755)
+            _grant(where, DIRECTORY)
             with open(done, encoding="utf-8") as cached:
                 results = json.load(cached)
             _shim(where, results)

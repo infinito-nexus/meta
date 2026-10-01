@@ -77,8 +77,8 @@ def test_an_artifact_is_unpacked_parsed_and_then_answered_from_disk(github, tmp_
     assert (passed["status"], skipped["status"]) == ("passed", "skipped")
     video = tmp_path / "7" / REPORT / "test-results/login-admin/video.webm"
     assert video.is_file()
-    assert (tmp_path / "7").stat().st_mode & 0o777 == 0o755, "nginx runs as another user and must enter the tree"
-    assert video.stat().st_mode & 0o777 == 0o644
+    assert (tmp_path / "7").stat().st_mode & 0o777 == 0o750, "the serving group enters the tree, nothing wider"
+    assert video.stat().st_mode & 0o777 == 0o640
 
 
 def test_the_report_gets_a_storage_stand_in_once_even_when_it_was_cached_without(github, tmp_path):
@@ -97,7 +97,7 @@ def test_a_cached_tree_left_closed_by_an_older_server_is_opened_on_the_next_read
     artifacts.fetch("infinito-nexus/core", "7", "token", str(tmp_path))
     (tmp_path / "7").chmod(0o700)
     artifacts.fetch("infinito-nexus/core", "7", "token", str(tmp_path))
-    assert (tmp_path / "7").stat().st_mode & 0o777 == 0o755
+    assert (tmp_path / "7").stat().st_mode & 0o777 == 0o750
 
 
 def test_no_token_no_download(github, tmp_path):
