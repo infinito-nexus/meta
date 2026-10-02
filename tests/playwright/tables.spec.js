@@ -149,7 +149,12 @@ test('variant awareness adds a variant axis to every table', async ({ page }) =>
 });
 
 test('a facet narrows the tables, not just the graph', async ({ page }) => {
-  await open2d(page, 'matrix');
+  await open2d(page);
+  const axis = page.locator('table.bond-matrix tbody tr');
+  await expect.poll(() => axis.count(), { timeout: 90000 }).toBeGreaterThan(100);
+  const full = await axis.count();
+
+  await pickView(page, 'matrix');
   const rows = page.locator('table.role-matrix tbody tr');
   await expect.poll(() => rows.count(), { timeout: 90000 }).toBeGreaterThan(100);
   const before = await rows.count();
@@ -163,12 +168,11 @@ test('a facet narrows the tables, not just the graph', async ({ page }) => {
   expect(await rows.count()).toBeGreaterThan(0);
 
   await pickView(page, 'bond');
-  const axis = page.locator('table.bond-matrix tbody tr');
   await expect.poll(() => axis.count()).toBeGreaterThan(0);
-  expect(await axis.count()).toBeLessThan(123);
+  expect(await axis.count()).toBeLessThan(full);
 
   await lifecycle.selectOption('');
-  await expect.poll(() => axis.count()).toBe(123);
+  await expect.poll(() => axis.count()).toBe(full);
 });
 
 test('a reload restores the view, the filters and the design', async ({ page }) => {

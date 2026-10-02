@@ -32,6 +32,11 @@ test('the overview carries the same controls and keeps itself open when held', a
   await expect(overview, 'a held popup does not fade out from under the reader').toBeVisible();
 
   await overview.locator('.popup-maximize').click();
+  await expect(overview).not.toHaveClass(/popup-maximized/);
+
+  await page.locator('#view-loader').hover();
+  await expect(overview).toBeVisible();
+  await overview.locator('.popup-maximize').click();
   await overview.locator('.popup-close').click();
   await expect(overview).toBeHidden();
 });

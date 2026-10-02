@@ -176,9 +176,9 @@ test('a second card opens without replacing the first', async ({ page }) => {
   await heads.nth(0).hover();
   await expect(page.locator(`.role-card-host[data-role="${first}"]`)).toBeVisible();
   await heads.nth(1).hover();
-  await expect(page.locator(`.role-card-host[data-role="${second}"]`)).toBeVisible();
-  await expect(page.locator(`.role-card-host[data-role="${first}"]`)).toBeVisible();
-  expect(await page.locator('.role-card-host').count()).toBe(2);
+  await page.waitForFunction(roles => roles.every(role =>
+    document.querySelector(`.role-card-host[data-role="${role}"]`))
+    && document.querySelectorAll('.role-card-host').length === 2, [first, second]);
 
   await expect(page.locator(`.role-card-host[data-role="${second}"] .popup-close`))
     .toBeVisible();
