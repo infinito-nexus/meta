@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.0.2] - 2026-10-02
+
+Repairs the image pipeline, stuck at e2e since 1.0.0; completes translations.
+
+### Fixed
+
+- e2e checks out infinito-nexus/core next to meta, the roles mount was empty
+- No image was published for 1.0.0 or 1.0.1, both tags stopped at e2e
+- Dropped BASE_IMAGE and PORT from the e2e call, nothing read them
+
+### Translations
+
+- The updates view speaks all 184 languages, with each one's plural forms
+- The shortened search is retranslated, no view says "search the runs" now
+
+### Tests
+
+- The facet test measures the bond axis instead of pinning 123 rows
+- The second-card test checks each frame that both cards coexist
+- The overview test closes a held popup, so a dead close button fails it
+
+### Dependencies
+
+- js-yaml 5.4.1 to 5.4.2, simple-icons 16.29.0 to 16.33.0
+- typescript 6.0.3 to 7.0.2 (dev)
+- build-push-action 6.19.2 to 7.4.0
+- upload-artifact 4 to 7, download-artifact 4 to 8
+
 ## [1.0.1] - 2026-10-01
 
 Closes all 17 code scanning alerts and repairs the build.
