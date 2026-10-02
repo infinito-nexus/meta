@@ -25,9 +25,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          path: meta
+
+      - name: Checkout infinito-nexus/core
+        uses: actions/checkout@v7
+        with:
+          repository: infinito-nexus/core
+          path: infinito-nexus-core
 
       - name: Run E2E
-        run: BASE_IMAGE=ghcr.io/${{ github.repository_owner }}/infinito-debian:latest make e2e PORT=18080
+        working-directory: meta
+        run: make e2e
 
   build:
     needs: e2e
