@@ -45,17 +45,16 @@ mkdir -p "$HOME_DIR/worktrees" "$HOME_DIR/artifacts"
 (
   if [ ! -d "$MIRROR" ]; then
     echo "mig-git: cloning $ROOT"
-    # set -e would end this subshell in silence, and the half-written
-    # directory would make the test above skip the clone on every later
-    # start, leaving every /git/ route on 502 for good.
-    git clone --bare --filter=blob:none "https://github.com/$ROOT.git" "$MIRROR" || {
+    staging="$(mktemp -d "$MIRROR.incoming.XXXXXX")"
+    git clone --bare --filter=blob:none "https://github.com/$ROOT.git" "$staging" || {
       status=$?
-      rm -rf "$MIRROR"
+      rm -rf "$staging"
       echo "mig-git: cloning $ROOT failed with $status, /git/ stays unavailable" >&2
       exit 1
     }
-    git --git-dir "$MIRROR" config remote.origin.promisor true
-    git --git-dir "$MIRROR" config remote.origin.partialclonefilter blob:none
+    git --git-dir "$staging" config remote.origin.promisor true
+    git --git-dir "$staging" config remote.origin.partialclonefilter blob:none
+    mv "$staging" "$MIRROR" 2>/dev/null || rm -rf "$staging"
   fi
 
   listed=""
