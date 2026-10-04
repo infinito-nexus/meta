@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.3] - 2026-10-04
+
+Lets replicas share one git volume; a losing clone no longer kills the mirror.
+
+### Fixed
+
+- Mirror cloned into a staging directory and renamed in, so the first writer wins
+- A loser's rename fails on the non-empty target and drops only its own copy
+- Previously a loser's *rm -rf* took the winner's mirror, wedging */git/* on 502
+- Replicas can share one volume without a node pin or a single replica
+
 ## [1.0.2] - 2026-10-02
 
 Repairs the image pipeline, stuck at e2e since 1.0.0; completes translations.
