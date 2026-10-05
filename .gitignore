@@ -3,6 +3,7 @@ src/infinito_meta/
 .env
 .mcp.json
 node_modules/
+.python-deps
 test-results/
 playwright-report/
 __pycache__/

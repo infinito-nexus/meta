@@ -73,6 +73,10 @@ node_modules: package.json package-lock.json
 	npm install --no-audit --no-fund
 	touch node_modules
 
+.python-deps: requirements.txt
+	$(PYTHON) -m pip install -r requirements.txt
+	@touch $@
+
 vendor: node_modules
 	node scripts/vendor.js
 
@@ -85,11 +89,11 @@ test-browser: vendor
 test-fast: vendor
 	MIG_CHROMIUM=$(MIG_CHROMIUM) npx playwright test $(ARGS)
 
-lint: node_modules
+lint: node_modules .python-deps
 	python3 -m pytest -q tests/lint
 	npx tsc -p tsconfig.json
 
-test-server:
+test-server: .python-deps
 	python3 -m pytest -q tests/mig tests/scripts
 
 translate:
