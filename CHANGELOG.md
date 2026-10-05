@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.1] - 2026-10-05
+
+Repairs the 2.0.0 release, which published no image.
+
+### Fixed
+
+- preact 11 renamed its ESM builds to *.mjs*; vendoring threw and e2e died
+- Every one of the eighteen vendored paths is checked, not just the first
+- *make test* installs the pytest it needs; the test job died on its absence
+
 ## [2.0.0] - 2026-10-05
 
 Publishes as *meta*, serves the page without an inline script, and lets the
