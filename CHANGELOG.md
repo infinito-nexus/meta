@@ -1,5 +1,37 @@
 # Changelog
 
+## [2.0.0] - 2026-10-05
+
+Publishes as *meta*, serves the page without an inline script, and lets the
+whole test suite gate a release for the first time.
+
+### Breaking
+
+- The image is now *ghcr.io/infinito-nexus/meta*, not *infinito-mig*
+- Its name follows the repository, so a fork publishes under its own
+- Consumers pinning the old name must repoint; infinito-nexus/core did
+- A push to main without a tag no longer publishes, only tags do
+
+### Fixed
+
+- The page carries no inline script, so a strict CSP no longer blocks it
+- An import map has no external form, so the modules import by path instead
+- Vendoring rewrites preact's own bare *preact* import, which needs no map
+- It throws when upstream stops shipping that import, rather than going quiet
+- Vendored modules are marked *@ts-nocheck*; tsconfig's exclude does not
+  reach a module imported by path, and *make lint* was checking three
+  thousand lines of third-party build output
+- A release triggered twice, once for main and once for the tag of one commit
+
+### Tests
+
+- *make test* runs every suite: lints, types, server units, Playwright
+- The browser-only suite is *make test-browser*
+- CI gates the build on that suite beside the HTTP smoke test; before, 146
+  Playwright specs, 9 lints and 26 server units never gated a release
+- A lint keeps the page free of inline scripts and the vendor tree free of
+  bare specifiers
+
 ## [1.0.3] - 2026-10-04
 
 Lets replicas share one git volume; a losing clone no longer kills the mirror.
