@@ -589,14 +589,21 @@ Every reload reflects the current on-disk state of the roles tree.
 
 ## 🧪 Tests
 
-Playwright drives the real app headless (boot, heaviest-role start, graph
-render, facet population, auto-iteration):
+Every suite below, in one target, which is what CI runs:
 
 ```bash
 make test
 ```
 
-The folder layout and the types of `src/` are checked without a browser:
+Playwright drives the real app headless (boot, heaviest-role start, graph
+render, facet population, auto-iteration):
+
+```bash
+make test-browser
+```
+
+The folder layout, the types of `src/` and the page's own invariants are
+checked without a browser:
 
 ```bash
 make lint

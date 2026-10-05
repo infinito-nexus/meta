@@ -1,6 +1,6 @@
-import htm from 'htm';
-import { h, render } from 'preact';
-import { useState } from 'preact/hooks';
+import htm from './vendor/htm/htm.module.js';
+import { h, render } from './vendor/preact/preact.module.js';
+import { useState } from './vendor/preact/hooks.module.js';
 
 export const html = htm.bind(h);
 export { render, useState };

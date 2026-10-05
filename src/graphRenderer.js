@@ -1,6 +1,6 @@
 // graphRenderer.js
 
-import * as THREE from 'three';
+import * as THREE from './vendor/three.module.js';
 
 /**
  * Renders a 3D force‑directed graph into a given container,
@@ -87,8 +87,10 @@ export class GraphRenderer {
       ctx.fillText('⏳', 32, 34);
       this._loadingTexture = new THREE.CanvasTexture(canvas);
     }
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({ map: this._loadingTexture, depthWrite: false })
+    const sprite = /** @type {any} */ (
+      new THREE.Sprite(
+        new THREE.SpriteMaterial({ map: this._loadingTexture, depthWrite: false })
+      )
     );
     sprite.scale.set(8, 8, 1);
     sprite.position.set(0, 8, 0);

@@ -16,7 +16,7 @@ LIBRETRANSLATE_URL ?= http://127.0.0.1:5000
 # Param: PYTHON  the interpreter that holds the requirements.txt packages
 PYTHON ?= python3
 
-.PHONY: help up down logs rebuild e2e vendor test test-fast lint test-server translate image nginx-verify nginx-probe gh-status git-status git-route install-python mtu clean
+.PHONY: help up down logs rebuild e2e vendor test test-browser test-fast lint test-server translate image nginx-verify nginx-probe gh-status git-status git-route install-python mtu clean
 
 help:
 	@echo "Targets:"
@@ -26,7 +26,8 @@ help:
 	@echo "  make rebuild             Down + up"
 	@echo "  make e2e                 Start stack, run HTTP E2E checks, stop stack"
 	@echo "  make vendor              Copy the pinned npm libraries into src/vendor"
-	@echo "  make test                Install browsers, then run the Playwright suite"
+	@echo "  make test                Run every suite: lint, server units, Playwright"
+	@echo "  make test-browser        Install browsers, then run the Playwright suite"
 	@echo "  make test-fast           Run the Playwright suite without installing"
 	@echo "  make lint                Run the repository lints under tests/lint and the type check"
 	@echo "  make test-server         Run the unit tests of the mig/ server code"
@@ -75,7 +76,9 @@ node_modules: package.json package-lock.json
 vendor: node_modules
 	node scripts/vendor.js
 
-test: vendor
+test: lint test-server test-browser
+
+test-browser: vendor
 	npx playwright install chromium
 	MIG_CHROMIUM=$(MIG_CHROMIUM) npx playwright test
 

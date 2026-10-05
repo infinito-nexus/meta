@@ -31,6 +31,8 @@ const FILES = [
 const icons = [...new Set(Object.values(JSON.parse(fs.readFileSync(BRANDS, 'utf8'))))]
   .map(slug => ['simple-icons', `icons/${slug}.svg`, `simple-icons/${slug}.svg`]);
 
+const SPECIFIERS = [['preact/hooks.module.js', 'preact', './preact.module.js']];
+
 fs.rmSync(OUT, { recursive: true, force: true });
 for (const [pkg, file, target] of [...FILES, ...icons]) {
   const source = path.join(ROOT, 'node_modules', pkg, file);
@@ -38,5 +40,18 @@ for (const [pkg, file, target] of [...FILES, ...icons]) {
   const dest = path.join(OUT, target);
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.copyFileSync(source, dest);
+}
+for (const [target, specifier, relative] of SPECIFIERS) {
+  const dest = path.join(OUT, target);
+  const before = fs.readFileSync(dest, 'utf8');
+  const after = before.replaceAll(`from"${specifier}"`, `from"${relative}"`);
+  if (after === before) throw new Error(`${target} no longer imports "${specifier}"`);
+  fs.writeFileSync(dest, after);
+}
+
+for (const [, , target] of [...FILES, ...icons]) {
+  if (!target.endsWith('.js')) continue;
+  const dest = path.join(OUT, target);
+  fs.writeFileSync(dest, `// @ts-nocheck\n${fs.readFileSync(dest, 'utf8')}`);
 }
 console.log(`src/vendor: ${FILES.length + icons.length} files`);
