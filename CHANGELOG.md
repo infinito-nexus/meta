@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.2] - 2026-10-05
+
+Repairs the 2.0.1 release, which published no image either.
+
+- *make lint* ran before anything had filled the gitignored *src/vendor*
+- A fresh checkout held no vendored module, so the test job died in the lint
+- *lint* now depends on *vendor*, as the other test targets already did
+
 ## [2.0.1] - 2026-10-05
 
 Repairs the 2.0.0 release, which published no image.
