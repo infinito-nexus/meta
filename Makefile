@@ -89,7 +89,7 @@ test-browser: vendor
 test-fast: vendor
 	MIG_CHROMIUM=$(MIG_CHROMIUM) npx playwright test $(ARGS)
 
-lint: node_modules .python-deps
+lint: vendor .python-deps
 	python3 -m pytest -q tests/lint
 	npx tsc -p tsconfig.json
 
