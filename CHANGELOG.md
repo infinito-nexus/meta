@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.4] - 2026-10-06
+
+- A restored card leaves the pointer, lingers, fades and leaves the page
+- The maximize test read its width a round trip later and met no element
+- The restoring click and the measurement now share one browser task
+
+- A release joins the concurrency group of main and cancels what runs there
+- A newer version replaces an older release or weekly run still in flight
+- Every other run, a pull request included, waits instead of cancelling
+
 ## [2.0.3] - 2026-10-06
 
 - Two Playwright waits sat behind a read of every role on the default 15 s
