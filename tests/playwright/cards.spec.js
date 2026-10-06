@@ -142,9 +142,15 @@ test('the maximize button spreads the card over the window and back', async ({ p
   await page.waitForTimeout(1500);
   await expect(card, 'a maximized card does not fade when the pointer leaves').toBeVisible();
 
-  await card.locator('.popup-maximize').click();
-  await expect(card).not.toHaveClass(/popup-maximized/);
-  expect((await card.boundingBox()).width).toBeLessThan(before.width + 40);
+  const restoredBeforeItFades = await card.evaluate(element => {
+    element.querySelector('.popup-maximize').click();
+    return {
+      maximized: element.classList.contains('popup-maximized'),
+      width: element.getBoundingClientRect().width,
+    };
+  });
+  expect(restoredBeforeItFades.maximized).toBe(false);
+  expect(restoredBeforeItFades.width).toBeLessThan(before.width + 40);
 });
 
 test('every card carries the same three controls, in the same corner', async ({ page }) => {
