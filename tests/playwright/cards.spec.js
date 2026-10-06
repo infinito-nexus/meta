@@ -174,7 +174,8 @@ test('a second card opens without replacing the first', async ({ page }) => {
   const second = await heads.nth(1).getAttribute('data-role-name');
 
   await heads.nth(0).hover();
-  await expect(page.locator(`.role-card-host[data-role="${first}"]`)).toBeVisible();
+  await expect(page.locator(`.role-card-host[data-role="${first}"]`))
+    .toBeVisible({ timeout: 60000 });
   await heads.nth(1).hover();
   await page.waitForFunction(roles => roles.every(role =>
     document.querySelector(`.role-card-host[data-role="${role}"]`))

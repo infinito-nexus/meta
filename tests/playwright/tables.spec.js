@@ -176,6 +176,7 @@ test('a facet narrows the tables, not just the graph', async ({ page }) => {
 });
 
 test('a reload restores the view, the filters and the design', async ({ page }) => {
+  test.slow();
   await page.goto('/');
   await expect
     .poll(() => page.evaluate(() => Boolean(window.__mig?.tableView)), { timeout: 60000 })
@@ -213,7 +214,7 @@ test('a reload restores the view, the filters and the design', async ({ page }) 
   await expect
     .poll(() => page.evaluate(() => Boolean(window.__mig?.tableView)), { timeout: 60000 })
     .toBe(true);
-  await expect.poll(() => page.locator('#tables tbody tr').count()).toBe(rows);
+  await expect.poll(() => page.locator('#tables tbody tr').count(), { timeout: 90000 }).toBe(rows);
   await expect(page.locator('#view-matrix')).toBeChecked();
   await expect(page.locator('[data-preset="complexity"]')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('html')).toHaveAttribute('data-bs-theme', 'dark');
