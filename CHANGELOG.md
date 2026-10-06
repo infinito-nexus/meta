@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3] - 2026-10-06
+
+- Two Playwright waits sat behind a read of every role on the default 15 s
+- On the runner the first card and the reloaded matrix took longer than that
+- Both now carry the budget their sibling waits already had
+- The reload test reads everything twice and is marked slow; 60 s cut it off
+
 ## [2.0.2] - 2026-10-05
 
 Repairs the 2.0.1 release, which published no image either.
