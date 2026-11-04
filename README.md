@@ -587,6 +587,34 @@ rebuild`, not `make up`: docker fixes a network's MTU when it creates it.
 
 Every reload reflects the current on-disk state of the roles tree.
 
+## 📦 Image
+
+[docker-publish.yml](.github/workflows/docker-publish.yml) publishes the
+image to `ghcr.io/<owner>/<repository>` for amd64 and arm64. One build carries
+every tag below, all on one digest:
+
+```text
+ghcr.io/<owner>/<repository>:latest                       # always the newest build
+ghcr.io/<owner>/<repository>:<major>                      # moves with every build of the major
+ghcr.io/<owner>/<repository>:<major>.<minor>[.<patch>]    # same, one level narrower
+ghcr.io/<owner>/<repository>:<release>.<unix-ts>          # one build, never moves
+```
+
+`<release>` is the newest `vX.Y.Z` tag reachable from the built commit,
+without the `v`; `<unix-ts>` is the build time, so `2.0.4.1767225600` is a
+full version an updater can order and pin. A tag push publishes its release.
+The weekly run, Sunday 03:17 UTC, rebuilds the newest release on `main`
+against the current `nginx:alpine`, so a security update reaches whoever
+pinned the major, the minor, the release or follows `latest`.
+
+A rebuild whose runtime image equals the published `latest`, with its release
+tag already out, pushes nothing: a new timestamp tag would make every pin bump
+for no change. Equal means the same installed apk packages and the same
+checksum for every file the image serves or configures nginx with; a manifest
+digest changes on every rebuild and cannot tell. After a push,
+[publish.sh](scripts/publish.sh) checks that `latest` and every release prefix
+point at the same image.
+
 ## 🧪 Tests
 
 Every suite below, in one target, which is what CI runs:
