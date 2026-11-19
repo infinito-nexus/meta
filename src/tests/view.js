@@ -4,6 +4,7 @@ import { html, render, toElement } from '../html.js';
 import { t } from '../i18n.js';
 import { PlaywrightMatrix } from '../playwrightMatrix.js';
 import { TestsCatalog } from './catalog.js';
+import { CiCoverage } from './coverage.js';
 import { TestsGrid } from './grid.js';
 import { fillRun } from './runCard.js';
 
@@ -22,6 +23,7 @@ export class TestsView extends TestsCatalog {
     this.lines = null;
     this.width = 0;
     this.runNote = '';
+    this.snapshotNote = '';
     this.onRun = null;
     /** @type {(promise: Promise<unknown>, label: () => string) => unknown} */
     this.track = promise => promise;
@@ -49,6 +51,24 @@ export class TestsView extends TestsCatalog {
         this.refresh();
         if (this.onRun) this.onRun();
         this._prefetch();
+      });
+  }
+
+  // Args:
+  //   side: 'branch' for the snapshot under review, 'base' for the one it is
+  //     compared with.
+  //   file: the snapshot JSON the visitor picked, or undefined to drop it.
+  loadSnapshot(side, file) {
+    this.snapshotNote = '';
+    const read = file ? file.text().then(text => CiCoverage.read(JSON.parse(text))) : Promise.resolve(null);
+    return read
+      .catch(error => {
+        this.snapshotNote = t('tests.ci.failed', { name: file.name, message: error.message });
+        return null;
+      })
+      .then(snapshot => {
+        this.snapshots[side] = snapshot;
+        this.refresh();
       });
   }
 
@@ -152,7 +172,7 @@ export class TestsView extends TestsCatalog {
     const all = this.kind === 'cli' ? this._cliRows() : this._playwrightRows();
     const rows = this.gate === 'all' ? all : all.filter(row => row.gate === this.gate);
     this.lines = TestsView._lines(this._sorted(rows));
-    this.note = [this._note(all, rows), this._runNote()].filter(Boolean).join(' ');
+    this.note = [this._note(all, rows), this._runNote(), this.snapshotNote].filter(Boolean).join(' ');
     this.width = this.lines.reduce((most, line) => Math.max(most, line.cells.length), 0);
     this.detail = new Map();
     for (const line of this.lines) {
@@ -205,7 +225,10 @@ export class TestsView extends TestsCatalog {
     const status = TestsView.STATUS[row.gate];
     const scalars = [
       [t('tests.card.variant'), row.variant === null ? t('tests.base') : String(row.variant)],
+      [t('tests.card.spec'), row.module ? `${row.module}.js` : ''],
       [t('tests.gate'), status.title],
+      [t('tests.card.coverage'), row.coverage ? t(`tests.ci.state.${row.coverage}`) : ''],
+      [t('tests.card.ci'), row.ci ? CiCoverage.describe(row.ci, ', ') : ''],
       [t('tests.card.rank'), plan ? String(plan.rank) : t('tests.card.undiscovered')],
       [t('tests.card.timeout'), row.timeout ? `${row.timeout}s` : ''],
       [t('tests.card.why'), (row.reasons || []).join('; ')],

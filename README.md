@@ -172,6 +172,44 @@ single artifact may weigh; both count bytes.
 - A line is marked by its artifact's name. When one deploy tests several roles,
   the others' reports sit in that artifact too, but their lines stay unmarked.
 
+#### CI coverage
+
+The **CI snapshot** field above the Playwright table answers whether every
+Playwright test still runs in CI, and **compared with** answers what a change
+to the matrix costs. Both take a snapshot core writes; take one per checkout
+with the same seed, for example the base branch and the pull request:
+
+```bash
+python -m cli.meta.ci.variant_split snapshot --seed 44360158737 --out base.json
+```
+
+The page cannot plan the sweep itself (see [Sort order](#sort-order)), so it
+reads what the snapshot recorded: per sweep the head the runner budget
+deploys, and per row its round, the roles it brings up and at which variant.
+A row runs the specs of every role its round deploys, not only its own app,
+because `test-e2e-playwright` tests `lookup('deployment').running`. A row
+counts only when every sweep's head carries it, since one run plays one sweep.
+
+With a snapshot loaded the table turns to one line per variant, and a **CI**
+column counts the rows that deploy the role at that variant; hovering it, or a
+test, names them with their modes. Each test gets one verdict across its
+variants, because a spec run under another variant can skip a test:
+
+- **runs in a CI row**: some CI variant runs it with every skip gate on
+- **only behind a gate the deployed closure settles**: no CI variant settles
+  it either way
+- **no CI row runs it**, red: the role is planned, but no head row deploys
+  it in a variant that runs the test
+- **CI discovery leaves the role out**: no row at all, by lifecycle or mode,
+  the same split `cli.meta.ci.playwright_coverage` makes
+- **ran in the compared snapshot, runs less here**, red and framed: the note
+  names every such test with its spec file
+
+Cells of a variant no CI row deploys are dimmed. The gates come from the
+served tree, so serve the snapshot's own checkout; the note names every role
+whose variant count differs from a loaded snapshot's, where the numbers may not
+line up.
+
 #### The repository's own suites
 
 Below Playwright and CLI the **Tests** menu holds the suites `make test` fans

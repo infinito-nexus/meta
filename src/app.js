@@ -24,6 +24,7 @@ import { RoleInfo } from './role/info.js';
 import { TableView } from './table/view.js';
 import { CodeTests } from './tests/code/model.js';
 import { CodeTestsView } from './tests/code/view.js';
+import { CiCoverage } from './tests/coverage.js';
 import { TestRuns } from './tests/runs.js';
 import { TestsView } from './tests/view.js';
 import { TodosView } from './todos/view.js';
@@ -45,7 +46,7 @@ import { currentView, disableMetaViews, redraw, wirePanels, wireViewMode } from 
 // in-memory; expanding nodes never refetches.
 
 // The specs reach these through page.evaluate; nothing in the app reads them.
-Object.assign(window, { PlaywrightMatrix, RoleInfo, TableView, TestsView, UrlState });
+Object.assign(window, { CiCoverage, PlaywrightMatrix, RoleInfo, TableView, TestsView, UrlState });
 
 setStatus(t('status.scanning'));
 

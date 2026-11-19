@@ -786,6 +786,21 @@ table.tests-matrix td.pw-unknown {
   background: color-mix(in srgb, var(--bs-warning) 12%, transparent);
 }
 
+table.tests-matrix .ci-off {
+  opacity: 0.4;
+}
+
+table.tests-matrix td.ci-hole,
+table.tests-matrix td.ci-lost {
+  opacity: 1;
+  color: var(--bs-white);
+  background: var(--bs-danger);
+}
+
+table.tests-matrix td.ci-lost {
+  box-shadow: inset 0 0 0 2px var(--bs-warning);
+}
+
 .role-card-host:has(.test-card) {
   max-width: 460px;
 }

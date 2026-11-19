@@ -2,6 +2,7 @@ import { CiOrder } from '../ciOrder.js';
 import { t } from '../i18n.js';
 import { MetaTables } from '../meta/tables.js';
 import { PlaywrightMatrix } from '../playwrightMatrix.js';
+import { CiCoverage } from './coverage.js';
 
 export class TestsCatalog {
   static GATES = Object.fromEntries(
@@ -39,6 +40,7 @@ export class TestsCatalog {
     this.mcp = null;
     this.meta = null;
     this.matrix = null;
+    this.snapshots = { branch: null, base: null };
   }
 
   _keeps(role) {
@@ -48,7 +50,7 @@ export class TestsCatalog {
   // Off, a role is one line against its base meta/services.yml, which leaves
   // every group_names flag unsettled; on, one line per meta/variants.yml entry.
   _variants(role) {
-    const count = this.variantAware ? this.tables.variantCount(role) : 0;
+    const count = this.variantAware || this.snapshots.branch ? this.tables.variantCount(role) : 0;
     return count ? [...Array(count).keys()] : [null];
   }
 
@@ -67,7 +69,28 @@ export class TestsCatalog {
         rows.push(...this.matrix.rows(role, variant, payload, flags, tests));
       }
     }
-    return TestsCatalog._scope(rows);
+    const scoped = TestsCatalog._scope(rows);
+    const { branch, base } = this.snapshots;
+    return branch ? CiCoverage.annotate(scoped, branch, base) : scoped;
+  }
+
+  // Args:
+  //   all: every Playwright row, its CI coverage set.
+  _coverageNote(all) {
+    const { branch, base } = this.snapshots;
+    if (!branch || this.kind !== 'playwright') return '';
+    const tests = CiCoverage.tests(all);
+    const count = state => tests.filter(row => row.coverage === state).length;
+    const lost = tests.filter(row => row.coverage === 'lost');
+    const served = Object.fromEntries(Object.keys(this.suites).map(role => [role, this.tables.variantCount(role)]));
+    const drift = new Set([branch, base].filter(Boolean).flatMap(snapshot => CiCoverage.drift(snapshot, served)));
+    return [
+      t('tests.ci.note', {
+        n: tests.length, covered: count('covered'), maybe: count('maybe'), hole: count('hole'), excluded: count('excluded'),
+      }),
+      base ? t('tests.ci.lost', { n: lost.length, tests: lost.map(row => `${row.role} · ${row.module}.js · ${row.test}`).join('; ') }) : '',
+      drift.size ? t('tests.ci.drift', { roles: [...drift].join(', ') }) : '',
+    ].filter(Boolean).join(' ');
   }
 
   // The parser answers per variant. Whether a test can ever run, or can ever be
@@ -182,6 +205,7 @@ export class TestsCatalog {
         : t('tests.note.playwright', { n: all.length, roles, ...counts }),
       shown.length === all.length ? '' : t('tests.note.narrowed', { n: shown.length, gate: TestsCatalog.GATES[this.gate] }),
       this.sort === 'ci' ? this._ciNote() : '',
+      this._coverageNote(all),
     ].filter(Boolean).join(' ');
   }
 
