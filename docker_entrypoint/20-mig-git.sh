@@ -57,6 +57,8 @@ mkdir -p "$HOME_DIR/worktrees" "$HOME_DIR/artifacts"
     mv "$staging" "$MIRROR" 2>/dev/null || rm -rf "$staging"
   fi
 
+  python3 /usr/local/lib/mig/git.py &
+
   listed=""
   case "$FORKS" in
     off) ;;
@@ -83,8 +85,7 @@ mkdir -p "$HOME_DIR/worktrees" "$HOME_DIR/artifacts"
 
   git --git-dir "$MIRROR" fetch --prune origin >/dev/null 2>&1 || true
   remotes=$(git --git-dir "$MIRROR" remote | grep -v '^origin$' || true)
+  # shellcheck disable=SC2086  # one argument per remote name
   [ -n "$remotes" ] && git --git-dir "$MIRROR" fetch --multiple --prune --no-tags $remotes >/dev/null 2>&1
   echo "mig-git: mirror up to date"
 ) &
-
-python3 /usr/local/lib/mig/git.py &
