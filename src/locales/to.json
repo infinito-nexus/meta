@@ -493,6 +493,27 @@
   "tests.card.artifactFailed": "na'e 'ikai lava ke lau 'a e 'ātifeki: {message}",
   "tests.card.video": "Vitiō",
   "tests.card.report": "Lipooti",
+  "tests.card.spec": "Spec",
+  "tests.card.coverage": "In CI",
+  "tests.card.ci": "CI rows",
+  "tests.axis.ci": "CI",
+  "tests.ci.pick.branch": "CI snapshot",
+  "tests.ci.pick.base": "compared with",
+  "tests.ci.shape": "not a variant_split snapshot: it lacks sweeps or rounds",
+  "tests.ci.failed": "The snapshot {name} could not be read: {message}",
+  "tests.ci.none": "no CI row deploys this role at this variant",
+  "tests.ci.note": {
+    "other": "CI snapshot: of {n} tests, {covered} run in a CI row, {maybe} only behind a gate the deployed closure settles, {hole} in no CI row (red), {excluded} belong to roles CI discovery leaves out."
+  },
+  "tests.ci.lost": {
+    "other": "{n} tests run less than in the compared snapshot (red, framed): {tests}"
+  },
+  "tests.ci.drift": "The snapshot declares another variant count than the served tree for {roles}; their variant numbers may not line up.",
+  "tests.ci.state.covered": "runs in a CI row",
+  "tests.ci.state.maybe": "only behind a gate the deployed closure settles",
+  "tests.ci.state.hole": "no CI row runs it",
+  "tests.ci.state.lost": "ran in the compared snapshot, runs less here",
+  "tests.ci.state.excluded": "CI discovery leaves the role out",
   "tests.result.passed": "lava",
   "tests.result.failed": "tō",
   "tests.result.skipped": "hopo'i",
