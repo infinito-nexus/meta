@@ -231,10 +231,14 @@ test('the service registry resolves bond keys to provider roles', async ({ page 
     return {
       mariadb: tables.providerOf('mariadb'),
       entity: tables.entityName('svc-db-mariadb'),
+      declared: tables.entityName('web-app-seaweedfs'),
+      seaweedfs: tables.providerOf('seaweedfs'),
       edges: tables.bondEdges().size,
     };
   });
   expect(resolved.entity).toBe('mariadb');
   expect(resolved.mariadb).toBe('svc-db-mariadb');
+  expect(resolved.declared, 'a literal entity_name in vars/main.yml wins over the prefix').toBe('seaweedfs-console');
+  expect(resolved.seaweedfs).toBe('web-svc-seaweedfs');
   expect(resolved.edges).toBeGreaterThan(500);
 });

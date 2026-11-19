@@ -42,6 +42,8 @@ export class MetaRegistry {
   }
 
   entityName(roleName) {
+    const declared = MetaRegistry._name(this.meta[roleName]?.vars?.entity_name);
+    if (declared && !declared.includes('{{')) return declared;
     const lower = roleName.toLowerCase();
     let emptyMatch = false;
     for (const category of this.categoryPaths) {
