@@ -16,6 +16,9 @@ Endpoints (all GET, all JSON):
   /artifact?id=&repo=          a Playwright artifact of the root or a mirrored
                                fork, unpacked under /artifacts/<id>/, and its
                                results
+
+Every MIG_GIT_REFRESH seconds the mirror fetches every remote again, as
+/refresh does.
 """
 
 import json
@@ -23,6 +26,8 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
@@ -37,6 +42,7 @@ TREES = os.path.join(HOME, "worktrees")
 UNPACKED = os.path.join(HOME, "artifacts")
 PORT = int(os.environ["MIG_GIT_PORT"])
 KEEP = int(os.environ["MIG_GIT_KEEP"])
+REFRESH = int(os.environ["MIG_GIT_REFRESH"])
 # A bare clone keeps the root's branches as refs/heads, so it has no
 # refs/remotes/origin and "origin/HEAD" resolves to nothing.
 HEAD = "HEAD"
@@ -186,12 +192,31 @@ def prune():
     git("worktree", "prune", check=False)
 
 
-def refresh():
+def fetch():
     listed = [name for name in remotes() if name != "origin"]
     git("fetch", "--prune", "origin", check=False)
     if listed:
         git("fetch", "--multiple", "--prune", "--no-tags", *listed, check=False)
+
+
+def refresh():
+    fetch()
     return catalog()
+
+
+def refetch(seconds, rounds=None):
+    """Args:
+        seconds: the pause before each fetch.
+        rounds: how many fetches before returning; None never returns.
+    """
+    while rounds is None or rounds > 0:
+        time.sleep(seconds)
+        try:
+            fetch()
+        except (Failed, subprocess.TimeoutExpired) as error:
+            print(f"mig-git: refetch failed: {error}", file=sys.stderr)
+        if rounds is not None:
+            rounds -= 1
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -246,6 +271,7 @@ def main():
     if not os.path.isdir(MIRROR):
         print(f"mig-git: no mirror at {MIRROR}", file=sys.stderr)
         return 1
+    threading.Thread(target=refetch, args=(REFRESH,), daemon=True).start()
     ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
     return 0
 

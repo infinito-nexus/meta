@@ -14,6 +14,7 @@ def server(monkeypatch, tmp_path):
         "MIG_GIT_HOME": str(tmp_path),
         "MIG_GIT_PORT": "0",
         "MIG_GIT_KEEP": "3",
+        "MIG_GIT_REFRESH": "900",
     }.items():
         monkeypatch.setenv(key, value)
     module = importlib.import_module("git")
@@ -33,3 +34,17 @@ def test_the_root_and_its_mirrored_forks_may_lend_the_token(server):
 def test_a_stranger_never_gets_the_server_token(server):
     with pytest.raises(server.Failed, match="not a repository of this mirror"):
         server.mirrored("stranger/anything")
+
+
+def test_the_mirror_keeps_fetching_after_a_failed_fetch(server, monkeypatch):
+    calls = []
+
+    def fetch():
+        calls.append(len(calls))
+        if len(calls) == 1:
+            raise server.Failed("network down")
+
+    monkeypatch.setattr(server, "fetch", fetch)
+    monkeypatch.setattr(server.time, "sleep", lambda seconds: None)
+    server.refetch(900, rounds=3)
+    assert calls == [0, 1, 2]

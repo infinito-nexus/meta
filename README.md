@@ -602,7 +602,9 @@ tree is not served.
 `MIG_GIT_ROOT` is the repository the local mirror clones, `MIG_GIT_FORKS` is
 `auto`, `off` or a space separated `owner/name` list, and `MIG_GIT_HOME` is
 where the mirror lives inside the container. An `.env` without these three
-lines stops `make up`; copy them from `default.env`.
+lines stops `make up`; copy them from `default.env`. The mirror fetches every
+remote again every `MIG_GIT_REFRESH` seconds, 900 unless the container sets
+it, so a long-running container keeps following the root and its forks.
 
 `MIG_MTU` is the link MTU of the compose network. A compose network takes
 1500 whatever the host runs at, so on a host behind a tunnel or a VPN the
