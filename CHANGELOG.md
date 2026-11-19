@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.1.0] - 2026-11-19
+
+Added:
+
+- Tests: a CI snapshot shows which CI rows run each Playwright test
+- Tests: a compared snapshot marks every test that loses its last CI row
+- Tests: tests no CI row runs turn red, per variant and service gate
+- Image: every build also gets a tag of its release and its build time
+
+Fixed:
+
+- Start: a role's declared *entity_name* no longer reads as a duplicate
+- Git mirror: *git.py* starts after the first clone, so */git/* answers
+
+Contributors:
+
+- [Kevin Veen-Birkenbach](https://veen.world): CI coverage, git mirror
+
 ## [2.0.4] - 2026-10-06
 
 - A restored card leaves the pointer, lingers, fades and leaves the page
