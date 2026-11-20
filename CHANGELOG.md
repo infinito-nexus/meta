@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.0] - 2026-11-20
+
+Added:
+
+- Git mirror: fetches the root and its forks again every 15 minutes
+- Git mirror: *MIG_GIT_REFRESH* sets that pause in seconds, default 900
+
+Contributors:
+
+- [Kevin Veen-Birkenbach](https://veen.world): git mirror
+
 ## [2.1.0] - 2026-11-19
 
 Added:
